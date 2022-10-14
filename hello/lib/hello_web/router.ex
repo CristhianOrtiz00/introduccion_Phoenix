@@ -2,12 +2,13 @@ defmodule HelloWeb.Router do
   use HelloWeb, :router
 
   pipeline :browser do
-    plug :accepts, ["html"]
+    plug :accepts, ["html", "text"]
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, {HelloWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug HelloWeb.Plugs.Locale, "en"
   end
 
   pipeline :api do
@@ -18,20 +19,47 @@ defmodule HelloWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    get "/redirect_test", PageController, :redirect_test
+
+    resources "/users", UserController do
+      resources "/posts", PostController
+    end
+
+    get "/hello", HelloController, :index
+    get "/hello/:messenger", HelloController, :show
+    resources "/reviews", ReviewController
   end
 
-  # Other scopes may use custom stacks.
+  scope "/admin", HelloWeb.Admin, as: :admin do
+    pipe_through :browser
+
+    resources "/images", ImageController
+    resources "/reviews", ReviewController
+    resources "/users", UserController
+  end
+
+  scope "/api", HelloWeb.Api, as: :api do
+    pipe_through :api
+
+    scope "/v1", V1, as: :v1 do
+      resources "/images", ImageController
+      resources "/reviews", ReviewController
+      resources "/users", UserController
+    end
+  end
+
+  # Other scopes(ámbitos) pueden utilizar stacks.
   # scope "/api", HelloWeb do
   #   pipe_through :api
   # end
 
-  # Enables LiveDashboard only for development
+  # Habilita LiveDashboard sólo para el desarrollo
   #
-  # If you want to use the LiveDashboard in production, you should put
-  # it behind authentication and allow only admins to access it.
-  # If your application does not have an admins-only section yet,
-  # you can use Plug.BasicAuth to set up some basic authentication
-  # as long as you are also using SSL (which you should anyway).
+  # Si quieres usar el LiveDashboard en producción, debes ponerlo
+  # detrás de la autenticación y permitir que sólo los administradores puedan acceder a ella.
+  # Si tu aplicación aún no tiene una sección sólo para administradores,
+  # puedes usar Plug.BasicAuth para configurar una autenticación básica
+  # siempre y cuando estés usando SSL (lo cual deberías hacer de todos modos).
   if Mix.env() in [:dev, :test] do
     import Phoenix.LiveDashboard.Router
 
