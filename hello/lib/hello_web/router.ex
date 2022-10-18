@@ -51,6 +51,8 @@ defmodule HelloWeb.Router do
     get "/cart", CartController, :show
     put "/cart", CartController, :update
     resources "/orders", OrderController, only: [:create, :show]
+    resources "/posts", PostController
+    resources "/articles", ArticleController, except: [:new, :edit]
     # get "/redirect_test", PageController, :redirect_test
 
     # resources "/users", UserController do
