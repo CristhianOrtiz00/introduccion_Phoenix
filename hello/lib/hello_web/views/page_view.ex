@@ -8,6 +8,7 @@ defmodule HelloWeb.PageView do
   def render("show.json", %{page: page}) do
     %{data: %{title: page.title}}
   end
+
   # def render("index.html", assigns) do
   #   "rendering with assigns #{inspect Map.keys(assigns)}"
   # end
